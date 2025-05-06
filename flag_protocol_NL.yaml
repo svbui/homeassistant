@@ -1,0 +1,119 @@
+# -------------------------------------------------------------------
+# Created by  : svbui @ GitHUB
+# Version     : 0.1
+# Purpose     : Create sensors for when to flag in the Netherlands
+# 
+# Source      : https://www.rijksoverheid.nl/onderwerpen/grondwet-en-statuut/vraag-en-antwoord/wanneer-kan-ik-de-vlag-uithangen-en-wat-is-de-vlaginstructie
+#
+# Info        : The sensor will only be on when the sun is above the horizon. When the flag is well lit from both sides, you are allowed to flag during sundown.
+# -------------------------------------------------------------------
+
+# -------------------------------------------------------------------
+# Flag full mast
+# -------------------------------------------------------------------
+# 15 / 16 August
+# When the formal ending of WW2 is on a Sunday, we wil flag on the following Monday
+#
+# 15 / 16 December
+# When Koninkrijksdag is on a Sunday, we will flag the following Monday
+# -------------------------------------------------------------------
+- platform: template
+  sensors:
+    flag_full_no_banner:
+      unique_id: flag_full_no_banner
+      value_template: >-
+        {% set now = now() %}
+        {% set sun_elevation = state_attr('sun.sun', 'elevation') | int(0) %}
+        
+        {% set is_may_5 = now.month == 5 and now.day == 5 %}
+        
+        {% set is_last_saturday_june = now.month == 6 and now.weekday() == 5 and (now + timedelta(days=7)).month != 6 %}
+
+        {% set is_august_15 = now.month == 8 and now.day == 15 and now.weekday() != 6 %}
+        {% set is_august_16 = now.month == 8 and now.day == 16 and now.weekday() == 0 %}
+
+        {% set is_third_tuesday_september = now.month == 9 and now.weekday() == 1 and 15 <= now.day <= 21 %}
+
+        {% set is_december_15 = now.month == 12 and now.day == 15 and now.weekday() != 6 %}
+        {% set is_december_16 = now.month == 12 and now.day == 16 and now.weekday() == 0 %}
+
+        {{ 
+          (is_may_5 or is_last_saturday_june or is_august_15 or is_august_16 or is_third_tuesday_september or is_december_15 or is_december_16) and sun_elevation > 3
+        }}
+
+      icon_template: >-
+        {% if is_state("binary_sensor.flag_full_no_banner", "on") %}
+          mdi:flag-variant
+        {% else %}
+          mdi:flag-variant-off-outline
+        {% endif %}
+
+# -------------------------------------------------------------------
+# Flag full mast with Orange banner
+# -------------------------------------------------------------------
+# 31 Januari / 1 Februari
+# When princess Beatrix her birthday is on a Sunday, we will flag the following Monday
+#
+# 26 / 27 April
+# When the Kings birthday is on a Sunday, we will flag and celebrate the Saturday before
+#
+# 17 / 18 May
+# When princess Maxima her birthday is on a Sunday, we will flag the following Monday
+#
+# 7 / 8 December
+# When princess of Orange her birthday is on a Sunday, we will flag the following Monday
+#
+# -------------------------------------------------------------------
+- platform: template
+  sensors:
+    flag_full_with_banner:
+      unique_id: flag_full_with_banner
+      value_template: >-
+        {% set now = now() %}
+        {% set sun_elevation = state_attr('sun.sun', 'elevation') | int(0) %}
+
+        {% set is_january_31 = now.month == 1 and now.day == 31 and now.weekday() != 6 %}
+        {% set is_februari_1 = now.month == 2 and now.day == 1 and now.weekday() == 0 %}
+
+        {% set is_april_26 = now.month == 4 and now.day == 26 and now.weekday() == 5 %}
+        {% set is_april_27 = now.month == 4 and now.day == 27 and now.weekday() != 6 %}
+
+        {% set is_may_17 = now.month == 5 and now.day == 17 and now.weekday() != 6 %}
+        {% set is_may_18 = now.month == 5 and now.day == 18 and now.weekday() == 0 %}
+        
+        {% set is_december_7 = now.month == 12 and now.day == 7 and now.weekday() != 6 %}
+        {% set is_december_8 = now.month == 12 and now.day == 8 and now.weekday() == 0 %}
+        {{ 
+          (is_january_31 or is_februari_1 or is_april_26 or is_april_27 or is_may_17 or is_may_18 or is_december_7 or is_december_8) and sun_elevation > 3
+        }}
+
+      icon_template: >-
+        {% if is_state("binary_sensor.flag_full_with_banner", "on") %}
+          mdi:flag-variant-minus
+        {% else %}
+          mdi:flag-variant-off-outline
+        {% endif %}
+
+# -------------------------------------------------------------------
+# Flag half mast
+# -------------------------------------------------------------------
+- platform: template
+  sensors:
+    flag_half_mast:
+      unique_id: flag_half_mast
+      value_template: >-
+        {% set now = now() %}
+        {% set sun_elevation = state_attr('sun.sun', 'elevation') | int(0) %}
+        
+        {% set is_may_4 = now.month == 5 and now.day == 4 %}
+
+        {{ 
+          (is_may_4) and sun_elevation > 3
+        }}
+
+      icon_template: >-
+        {% if is_state("binary_sensor.flag_half_mast", "on") %}
+          mdi:flag-variant
+        {% else %}
+          mdi:flag-variant-off-outline
+        {% endif %}
